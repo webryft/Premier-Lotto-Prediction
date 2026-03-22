@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lotto Prediction Pro</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  text-align: center;
+}
+
+header {
+  padding: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+button {
+  padding: 15px 25px;
+  background: gold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  animation: fadeIn 0.3s ease;
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  margin: 8px;
+  border-radius: 6px;
+  border: none;
+}
+
+.timer {
+  color: gold;
+  font-weight: bold;
+  margin: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: scale(0.8);}
+  to {opacity: 1; transform: scale(1);}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="icon.png" width="50"> Lotto Prediction Pro <img src="icon2.png" width="20">
+</header>
+
+<h2>Smart Daily Predictions</h2>
+<p>Unlock premium predictions for ₦500</p>
+
+<button onclick="openModal()">Subscribe ₦500</button>
+
+<!-- Add this under the Subscribe button -->
+<div style="margin-top: 30px;">
+  <img src="ads.gif" alt="Advertisement" style="max-width: 100%; border-radius: 12px;">
+</div>
+
+<!-- Add this at the very end of body -->
+<footer style="
+    text-align: center;
+    padding: 15px;
+    background: #111827;
+    color: #888;
+    font-size: 14px;
+    margin-top: 40px;
+">
+  <p>Copyright © 2026 PL</p>
+</footer>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3>Complete Subscription</h3>
+
+    <input id="username" placeholder="Username">
+    <input id="password" type="password" placeholder="Password">
+
+    <p><b>Bank:</b> Kuda</p>
+    <p><b>Account No:</b> 2040541530</p>
+    <p><b>Name:</b> Victor mmeri</p>
+    <p><b>Amount:</b> ₦500</p>
+
+    <div class="timer" id="timer">10:00</div>
+
+    <div class="actions">
+      <button onclick="closeModal()">Cancel</button>
+      <button onclick="confirmPayment()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let time = 600;
+let interval;
+
+function openModal() {
+  document.getElementById("modal").style.display = "flex";
+  startTimer();
+}
+
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  clearInterval(interval);
+}
+
+function startTimer() {
+  interval = setInterval(() => {
+    time--;
+    let minutes = Math.floor(time / 60);
+    let seconds = time % 60;
+    document.getElementById("timer").innerText =
+      minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+
+    if (time <= 0) clearInterval(interval);
+  }, 1000);
+}
+
+function confirmPayment() {
+  let username = document.getElementById("username").value;
+
+  localStorage.setItem("subscribed", "true");
+  localStorage.setItem("user", username);
+
+  let message = encodeURIComponent(
+    "Hello, I made a subscription of ₦500. I want to confirm my payment.\nUsername: " + username + "\nTitle: Lotto Prediction"
+  );
+
+  window.location.href = "https://wa.me/17404061406?text=" + message;
+}
+</script>
+
+</body>
+</html>

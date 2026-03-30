@@ -10,34 +10,90 @@ body {
   background: #020617;
   color: white;
   font-family: Arial;
+  margin: 0;
+}
+
+/* HEADER */
+header {
+  padding: 15px;
+  background: #111827;
   text-align: center;
 }
 
-header {
-  padding: 15px;
-  font-size: 20px;
-  background: #111827;
+/* SCROLL TABS */
+.tabs {
+  display: flex;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 10px;
+  background: #020617;
 }
 
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  padding: 10px 15px;
+  background: #1e293b;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.tab.active {
+  background: gold;
+  color: black;
+  font-weight: bold;
+}
+
+/* CONTENT */
 .card {
   background: #1e293b;
   margin: 10px;
   padding: 20px;
   border-radius: 10px;
-  font-size: 20px;
-}
-
-button {
-  padding: 15px;
-  background: gold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  text-align: center;
 }
 
 .numbers {
-  font-size: 28px;
+  font-size: 26px;
   letter-spacing: 5px;
+}
+
+/* BUTTON */
+button {
+  display: block;
+  margin: 20px auto;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: gold;
+  font-weight: bold;
+}
+
+/* LIMIT PANEL */
+.limit-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(30,41,59,0.95);
+  padding: 25px;
+  border-radius: 15px;
+  width: 300px;
+  color: gold;
+  text-align: center;
+  opacity: 0;
+  transition: 0.3s;
+}
+
+.limit-panel.show {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
 }
 </style>
 </head>
@@ -45,68 +101,25 @@ button {
 <body>
 
 <header>
- <img src="icon.png" width="30"> Welcome, <span id="user"></span> <img src="icon2.png" width="20">
+  <img src="icon.png" width="25"> Welcome, <span id="user"></span>  <img src="icon2.png" width="20">
 </header>
 
-<div class="card">
-  <h3>Banker</h3>
-  <div id="banker" class="numbers">--</div>
-</div>
+<!-- SCROLL TABS -->
+<div class="tabs" id="tabs"></div>
 
-<div class="card">
-  <h3>Sure 2</h3>
-  <div id="sure2" class="numbers">-- --</div>
-</div>
+<!-- CONTENT -->
+<div id="content"></div>
 
-<div class="card">
-  <h3>Sure 3</h3>
-  <div id="sure3" class="numbers">-- -- --</div>
-</div>
+<button id="generateBtn" onclick="generate()">Generate Prediction</button>
 
-<button onclick="generate()">Generate Live Prediction</button>
-
-<style>
-/* Inline Modal / Panel for Limit Notice */
-.limit-panel {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  background: rgba(30,41,59,0.95);
-  padding: 30px;
-  border-radius: 15px;
-  width: 300px;
-  color: gold;
-  font-weight: bold;
-  text-align: center;
-  z-index: 9999;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-  opacity: 0;
-}
-
-.limit-panel.show {
-  transform: translate(-50%, -50%) scale(1);
-  opacity: 1;
-}
-
-.limit-panel button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  background: gold;
-  cursor: pointer;
-  font-weight: bold;
-}
-</style>
-
-<!-- Add this inside body -->
+<!-- LIMIT PANEL -->
 <div id="limitPanel" class="limit-panel">
   <p id="limitMsg"></p>
-  <button onclick="closeLimitPanel()">OK</button>
+  <button onclick="closeLimit()">OK</button>
 </div>
 
 <script>
+// AUTH
 if (!localStorage.getItem("subscribed")) {
   window.location.href = "index.html";
 }
@@ -114,108 +127,170 @@ if (!localStorage.getItem("subscribed")) {
 document.getElementById("user").innerText =
   localStorage.getItem("user") || "User";
 
+// FULL MARKET LIST
+const markets = [
+"Royal","Mark II","Enugu","Lucky","Total","Diamond","Peoples","Bingo",
+"Metro","Inter","Gold","06","Jackpot","Club Master","Super",
+"VAG","Fair Chance","King","MSP","Mid-Week","Bonanza","National"
+];
+
+// MARKET TYPES
+function getType(name) {
+  if (["Royal","Mark II","Lucky","Total"].includes(name)) return "basic";
+  if (["Enugu","Metro","Diamond","Peoples"].includes(name)) return "advanced";
+  return "pro";
+}
+
+// CREATE TABS
+let activeMarket = "Royal";
+const tabsDiv = document.getElementById("tabs");
+
+markets.forEach(m => {
+  let div = document.createElement("div");
+  div.className = "tab";
+  div.innerText = m;
+
+  if (m === activeMarket) div.classList.add("active");
+
+  div.onclick = () => {
+    activeMarket = m;
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    div.classList.add("active");
+    renderMarket();
+  };
+
+  tabsDiv.appendChild(div);
+});
+
+// RENDER MARKET
+function renderMarket() {
+  let type = getType(activeMarket);
+  let html = "";
+
+  if (type === "basic") {
+    html = card("Banker") + card("Sure 2") + card("Sure 3");
+  }
+
+  if (type === "advanced") {
+    html = card("Banker") + card("Sure 2") + card("Sure 3") +
+           card("Sure 4") + card("Sure 5");
+  }
+
+  if (type === "pro") {
+    html = card("Banker") + card("Nap 2") + card("Nap 3") +
+           card("Nap 4") + card("4 Direct") + card("5 Direct");
+  }
+
+  document.getElementById("content").innerHTML = html;
+}
+
+// CARD
+function card(title) {
+  return `
+    <div class="card">
+      <h3>${title}</h3>
+      <div class="numbers">--</div>
+    </div>
+  `;
+}
+
+// RANDOM
 function random() {
   return Math.floor(Math.random() * 90) + 1;
 }
 
-// LIMIT SETTINGS
-const MAX_USES = 5;
-const COOLDOWN = 6 * 60 * 60 * 1000; // 6 hours
+// LIMIT SYSTEM
+const MAX = 5;
+const COOLDOWN = 6 * 60 * 60 * 1000;
 
-function getUsageData() {
-  return JSON.parse(localStorage.getItem("usageData")) || {
-    count: 0,
-    startTime: Date.now()
-  };
+function getData() {
+  return JSON.parse(localStorage.getItem("usage")) || {count:0,time:Date.now()};
 }
 
-function saveUsageData(data) {
-  localStorage.setItem("usageData", JSON.stringify(data));
+function saveData(d) {
+  localStorage.setItem("usage", JSON.stringify(d));
 }
 
-function canGenerate() {
-  let data = getUsageData();
-  let now = Date.now();
-  let elapsed = now - data.startTime;
-
-  if (elapsed > COOLDOWN) {
-    // reset after 6 hours
-    data = { count: 0, startTime: now };
-    saveUsageData(data);
+function canUse() {
+  let d = getData();
+  if (Date.now() - d.time > COOLDOWN) {
+    d = {count:0,time:Date.now()};
+    saveData(d);
     return true;
   }
-
-  return data.count < MAX_USES;
+  return d.count < MAX;
 }
 
-function updateUsage() {
-  let data = getUsageData();
-  data.count++;
-  saveUsageData(data);
+function updateUse() {
+  let d = getData();
+  d.count++;
+  saveData(d);
 }
 
-function getRemainingTime() {
-  let data = getUsageData();
-  let remaining = COOLDOWN - (Date.now() - data.startTime);
-
-  let hrs = Math.floor(remaining / (1000 * 60 * 60));
-  let mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-
-  return hrs + "h " + mins + "m";
+function remaining() {
+  let d = getData();
+  let r = COOLDOWN - (Date.now() - d.time);
+  let h = Math.floor(r/3600000);
+  let m = Math.floor((r%3600000)/60000);
+  return h+"h "+m+"m";
 }
 
-// Limit panel functions
-function showLimitPanel() {
-  const panel = document.getElementById("limitPanel");
-  const msg = document.getElementById("limitMsg");
-  msg.innerText = "Limit reached.\nTry again in " + getRemainingTime();
-  panel.classList.add("show");
+function showLimit() {
+  document.getElementById("limitMsg").innerText =
+    "Limit reached. Try again in " + remaining();
+  document.getElementById("limitPanel").classList.add("show");
 }
 
-function closeLimitPanel() {
+function closeLimit() {
   document.getElementById("limitPanel").classList.remove("show");
 }
 
-// Animate numbers
-function animate(element, count, delay) {
-  let i = 0;
-  let interval = setInterval(() => {
-    element.innerText = random();
-    i++;
-    if (i > count) clearInterval(interval);
-  }, delay);
+// GENERATE
+function pick(count) {
+  let nums = [];
+  while (nums.length < count) {
+    let n = Math.floor(Math.random() * 90) + 1;
+    if (!nums.includes(n)) nums.push(n);
+  }
+  return nums.join(" ");
 }
 
-// Main generate function
 function generate() {
-  if (!canGenerate()) {
-    showLimitPanel();
-    document.querySelector("button").disabled = true;
+  if (!canUse()) {
+    showLimit();
     return;
   }
 
-  updateUsage();
+  updateUse();
 
-  // Animate numbers
-  animate(document.getElementById("banker"), 20, 50);
+  let type = getType(activeMarket);
 
-  setTimeout(() => {
-    document.getElementById("sure2").innerText =
-      random() + "  " + random();
-  }, 1000);
+  let cards = document.querySelectorAll(".numbers");
 
-  setTimeout(() => {
-    document.getElementById("sure3").innerText =
-      random() + "  " + random() + "  " + random();
-  }, 1500);
+  cards.forEach((el, index) => {
+    let label = el.previousElementSibling.innerText;
+
+    let count = 1;
+
+    if (label.includes("Sure 2") || label.includes("Nap 2")) count = 2;
+    if (label.includes("Sure 3") || label.includes("Nap 3")) count = 3;
+    if (label.includes("Sure 4") || label.includes("Nap 4")) count = 4;
+    if (label.includes("Sure 5")) count = 5;
+    if (label.includes("4 Direct")) count = 4;
+    if (label.includes("5 Direct")) count = 5;
+
+    let i = 0;
+    let interval = setInterval(() => {
+      el.innerText = pick(count);
+      i++;
+      if (i > 15) clearInterval(interval);
+    }, 60);
+  });
 }
 
-// Optional: Re-enable button after cooldown (live)
-setInterval(() => {
-  if (canGenerate()) {
-    document.querySelector("button").disabled = false;
-  }
-}, 60000);
+// INIT
+renderMarket();
 </script>
+
 </body>
 </html>
